@@ -1,0 +1,37 @@
+version: '3'
+services:
+  nginx:
+    restart: always
+    image: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx-config:/etc/nginx/conf.d
+      - ./html:/usr/share/nginx/html
+      - ./uploads:/home/api/uploads
+
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin 
+      MONGO_INITDB_ROOT_PASSWORD: 12345
+      MONGO_INITDB_DATABASE: db
+    volumes:
+      - ./mongo/mongo-data:/data/db
+      - ./mongo/mongo-init-scripts:/docker-entrypoint-initdb.d
+
+  pycerver:
+    image: pipc_service:development
+    environment:
+      - MONGO_URL=mongodb://admin:12345@mongo:27017
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./service:/home/pipc_service
+      - ./uploads:/var/uploads
+
+networks:
+  default:
+    name: cerver

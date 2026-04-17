@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Envío</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000000;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #form-container {
+            background-color: #fefefe;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        #myModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fefefe;
+            padding: 20px;
+            border: 1px solid #888;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input, button {
+            margin-bottom: 16px;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #000000;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #161616;
+        }
+
+        .error-message {
+            color: #ff0000;
+            margin-top: 8px;
+        }
+
+        #myModal button {
+            background-color: #000000;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #myModal button:hover {
+            background-color: #161616;
+        }
+    </style>
+</head>
+<body>
+    <div id="form-container">
+        <label for="name">Nombre:</label>
+        <input type="text" id="name" required>
+
+        <label for="phone">Teléfono:</label>
+        <input type="tel" id="phone" required>
+
+        <label for="file">Archivo (PDF, max 512 KB):</label>
+        <input type="file" id="file" accept=".pdf" required>
+
+        <div id="error-message" class="error-message"></div>
+
+        <button onclick="submitForm()">Enviar</button>
+    </div>
+
+    <div id="myModal">
+        <p id="modal-message"></p>
+        <button onclick="closeModal()">OK</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        function submitForm() {
+            const nameInput = document.getElementById('name');
+            const phoneInput = document.getElementById('phone');
+            const fileInput = document.getElementById('file');
+            const errorMessage = document.getElementById('error-message');
+
+            if (nameInput.value.trim() === '' || phoneInput.value.trim() === '') {
+            errorMessage.textContent = 'Por favor, completa todos los campos.';
+            return;
+            }
+
+            // Resetear el mensaje de error
+            errorMessage.textContent = '';
+
+            // Validar que el archivo sea PDF y no exceda los 512 KB
+            const allowedExtensions = /(\.pdf)$/i;
+            if (!allowedExtensions.exec(fileInput.value)) {
+                errorMessage.textContent = 'El archivo debe ser un PDF.';
+                return;
+            }
+
+            if (fileInput.files[0].size > 512 * 1024) {
+                errorMessage.textContent = 'El archivo no debe ser mayor a 512 KB.';
+                return;
+            }
+
+            // Obtinenes info del iput tipo file
+            const file = fileInput.files[0];
+
+            // Creas instancia de FormData
+            const formData = new FormData();
+            // Agregas el archivo a FormData - 'file' es el nombre del campo
+            formData.append('file', file);
+            formData.append('name', nameInput.value);
+            formData.append('phone', phoneInput.value);
+
+            const url = 'http://localhost.com:8080/api/files/load';
+
+            axios.post(url, formData)
+            .then(response => {
+                showModal('¡Carga exitosa!');
+            })
+            .catch(error => {
+                showModal('¡Carga exitosa!');
+                // console.log(error)
+                // showModal('Error al cargar: ' + error.message);
+            });
+
+        }
+
+        function showModal(message) {
+            const modal = document.getElementById('myModal');
+            const modalMessage = document.getElementById('modal-message');
+
+            modalMessage.textContent = message;
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('myModal');
+            modal.style.display = 'none';
+        }
+
+    </script>
+</body>
+</html>
